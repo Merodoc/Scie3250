@@ -35,10 +35,4 @@ BradTer <- function(outcome, player1, player2) {
   print(ans)
 }
 
-data("citations", package = "BradleyTerry2")
-citations.sf <- countsToBinomial(citations)
-names(citations.sf)[1:2] <- c("journal1", "journal2")
-BradTer(cbind(citations.sf$win1,citations.sf$win2), citations.sf$journal1, citations.sf$journal2)
-
-BTm(cbind(win1, win2), journal1, journal2, data = citations.sf)
 
