@@ -14,25 +14,40 @@ FuncSum1 <- function(f, vector1) {
 
 
 
-BradTer <- function(outcome, player1, player2) {
-  # outcome <- matrix of win for/against outcomes
+BradTer <- function(dataset) {
+  # outcome <- arbitrary parameter matrix
   # player 1 and 2 corresponding to the winner/loser of outcome columns
-  K <- length(unique(player1))
-  K
-  ans1 <- c()
-  ans2 <- c()
-  p = c(1:K)
-  for (i in (1:K)) {
-    ans1 <-c(ans1, outcome[i,1]*log(p[i]))
-    print(ans1)
+  wintable <- as.data.frame(table(dataset))
+  # Converts to table of counts
+  K <- length(unique(dataset[,1]))
+  input <- results <- rep(1, nrow(dataset))
+  parvec <- c(1:16)
+  for (i in 1:K) {
+      team1 <- levels(wintable[,1])[i]
+      for (j in 1:K) {
+        y <- 0
+        team2 <- levels(wintable[,2])[j]
+        count <- 0
+        wij <- 0
+  ## algorithm for single comparison
+  for (winner in wintable[,1]) {
+    count <- count + 1
+    x <- count
+    if(winner == team1) {
+      if(wintable[,2][count] == team2) {
+        wij <- wij + wintable[x,3]
+        }
+      
+    }
+        y = y + wij*log(input[i]) - wij*log(input[i] + input[j])
+        print(y)
   }
-  for (i in (1:K)) {
-    if (outcome[i, 1] < outcome[i, 2]) 
-      ans2 <- c(ans2, sum(outcome[i,])*log(2* p[i]))
-      print(ans2)
+      parvec[i] <- y
+      print(parvec)
+      }
   }
-  ans <- ans1 - ans2
-  print(ans)
-}
+  }
 
+NRL <- read.csv(file = "NRL.csv", row.names = 1)
+BradTer(NRL)
 

@@ -16,3 +16,12 @@ BTmpredict <- function(model1, player1, player2) {
   names(ans) = c()
   cat(player1, "Has a", ans, "chance of beating", player2)
 }
+
+NRL <- read.csv(file = "NRL.csv", row.names=1)
+
+results <- rep(1, nrow(NRL))
+
+NRLModel <- BTm(results, Winner, Loser, data = NRL, refcat="NEW")
+summary(NRLModel)
+BTmpredict(NRLModel, "..BRO", "..MEL")
+
