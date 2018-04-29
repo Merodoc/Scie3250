@@ -20,33 +20,38 @@ BradTer <- function(dataset) {
   wintable <- as.data.frame(table(dataset))
   # Converts to table of counts
   K <- length(unique(dataset[,1]))
-  input <- results <- rep(1, nrow(dataset))
+  testvec <- array(1, 16)/16
+  print(testvec)
   parvec <- c(1:16)
+  teamnames <- c()
   for (i in 1:K) {
       team1 <- levels(wintable[,1])[i]
+      teamnames <- c(teamnames, team1)
+      y <- 0
       for (j in 1:K) {
-        y <- 0
         team2 <- levels(wintable[,2])[j]
         count <- 0
-        wij <- 0
+
   ## algorithm for single comparison
   for (winner in wintable[,1]) {
     count <- count + 1
     x <- count
+    wij <- 0
+
     if(winner == team1) {
       if(wintable[,2][count] == team2) {
-        wij <- wij + wintable[x,3]
-        }
-      
+        nij <- wij + wintable[x,3]
+      }
+        y = y + (nij*log(testvec[i]) - nij*log(testvec[i] + testvec[j]))
+        z <- y
     }
-        y = y + wij*log(input[i]) - wij*log(input[i] + input[j])
-        print(y)
+    parvec[i] <- z
   }
-      parvec[i] <- y
-      print(parvec)
       }
   }
-  }
+  names(parvec) <- teamnames
+  print(parvec)
+}
 
 NRL <- read.csv(file = "NRL.csv", row.names = 1)
 BradTer(NRL)
