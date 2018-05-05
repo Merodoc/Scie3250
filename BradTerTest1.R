@@ -21,7 +21,6 @@ BradTer <- function(dataset) {
   # Converts to table of counts
   K <- length(unique(dataset[,1]))
   testvec <- array(1, 16)/16
-  print(testvec)
   parvec <- c(1:16)
   teamnames <- c()
   for (i in 1:K) {
@@ -50,9 +49,9 @@ BradTer <- function(dataset) {
       }
   }
   names(parvec) <- teamnames
-  print(parvec)
+  return(parvec)
 }
 
 NRL <- read.csv(file = "NRL.csv", row.names = 1)
 BradTer(NRL)
-
+optim(array(1,16), BradTer(NRL), data = NRL)
