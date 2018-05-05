@@ -57,18 +57,44 @@ liIter <- function(i, data, L, k=1) {
   return(wi[i] * liSum^-1)
 }
 
-PlanB <- function(data, L, k=1) {
-  if (k > 2) {
-    L <- L*(1/min(L))
-    print(L)
-  }
-  else {
+PlanB <- function(data, L, tol, k=1) {
   ansL <- L
   for (i in names(L)) {
     L[i] <- liIter(i, data, ansL, k)
-    }
-   PlanB(data, L, k+1)}
+  }
+  L <- L*(1/min(L))
+  if (length(which((L - ansL) < tol)) == length(L)) {
+    return(L)
+  }
+  else {
+  PlanB(data, L, k+1)
+  }
 }
+
+Lange2007 <- function(i, data, L, k = 1) {
+  testvec <- c()  
+  for (j in names(L)) {  
+    if (Hun1(i, j, data, L, k) != 0) {
+      testvec <- c(testvec, Wi(data)[i]/(Hun1(i, j, data, L, k)))
+    }
+    }
+  L[i] <- sum(testvec)
+}
+
+RBT <- function(data, L, tol, k=1){
+  ansL <- L
+  for (i in names(L)) {
+    L[i] <- Lange2007(i, data, ansL, k)
+  }
+  L <- L*(1/min(L))
+  if (length(which((L - ansL) < tol)) == length(L)) {
+    return(L)
+  }
+  else {
+    RBT(data, L, k+1)
+  }
+}
+
 
 
 NRL <- read.csv("NRL.csv", row.names=1)
@@ -78,4 +104,19 @@ NRL <- as.data.frame(table(NRL))
 L <- array(1, 16)
 names(L) <- unique(NRL[,1])
 #liIter("MEL", NRL, L)
-PlanB(NRL, L)
+#RBT("BRO", NRL, L)
+Z <- PlanB(NRL, L, 0.00001)
+X <- RBT(NRL, L, 0.00001)
+print(Z["BRO"]/(Z["BRO"] + Z["GCT"]))
+print(Z["BRO"]/(Z["BRO"] + Z["MEL"]))
+print(X["BRO"]/(X["BRO"] + X["GCT"]))
+print(X["BRO"]/(X["BRO"] + X["MEL"]))
+
+source('BTmpredict.R')
+results <- rep(1, nrow(NRL))
+
+NRLModel <- BTm(results, Winner, Loser, data = NRL, refcat="NEW")
+summary(NRLModel)
+BTmpredict(NRLModel, "..BRO", "..GCT")
+BTmpredict(NRLModel, "..BRO", "..MEL")
+#print(L)

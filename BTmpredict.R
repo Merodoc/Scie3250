@@ -23,5 +23,5 @@ results <- rep(1, nrow(NRL))
 
 NRLModel <- BTm(results, Winner, Loser, data = NRL, refcat="NEW")
 summary(NRLModel)
-BTmpredict(NRLModel, "..BRO", "..MEL")
+BTmpredict(NRLModel, "..BRO", "..GCT")
 
