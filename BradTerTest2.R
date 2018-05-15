@@ -84,39 +84,33 @@ Lange2007 <- function(i, data, L, k = 1) {
 RBT <- function(data, L, tol, k=1){
   ansL <- L
   for (i in names(L)) {
-    L[i] <- Lange2007(i, data, ansL, k)
+    L[i] <- liIter(i, data, ansL, k)
   }
   L <- L*(1/min(L))
-  if (length(which((L - ansL) < tol)) == length(L)) {
-    return(L)
+  if (length(which((log(L) - log(ansL)) < tol)) == length(L)) {
+    return(log(L))
   }
   else {
-    RBT(data, L, k+1)
+    RBT(data, L, tol, k)
   }
 }
 
 
 
+
 NRL <- read.csv("NRL.csv", row.names=1)
-NRL <- as.data.frame(table(NRL))
+NRL2 <- as.data.frame(table(NRL))
 #Wij("BRO", "CAN", as.data.frame(table(NRL)))
 #Nij("BRO", "CAN", as.data.frame(table(NRL)))
 L <- array(1, 16)
 names(L) <- unique(NRL[,1])
 #liIter("MEL", NRL, L)
 #RBT("BRO", NRL, L)
-Z <- PlanB(NRL, L, 0.00001)
-X <- RBT(NRL, L, 0.00001)
-print(Z["BRO"]/(Z["BRO"] + Z["GCT"]))
-print(Z["BRO"]/(Z["BRO"] + Z["MEL"]))
-print(X["BRO"]/(X["BRO"] + X["GCT"]))
-print(X["BRO"]/(X["BRO"] + X["MEL"]))
-
-source('BTmpredict.R')
+#Z <- PlanB(NRL, L, 0.00001)
+X <- RBT(NRL2, L, 0.00001)
+print(X)
 results <- rep(1, nrow(NRL))
-
 NRLModel <- BTm(results, Winner, Loser, data = NRL, refcat="NEW")
-summary(NRLModel)
-BTmpredict(NRLModel, "..BRO", "..GCT")
-BTmpredict(NRLModel, "..BRO", "..MEL")
-#print(L)
+Z <- BTabilities(NRLModel)
+print(Z)
+sort(Z[,1])-sort(X)
