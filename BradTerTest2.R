@@ -98,8 +98,14 @@ RBT <- function(data, L, tol, k=1){
 
 
 
-NRL <- read.csv("NRL.csv", row.names=1)
-NRL2 <- as.data.frame(table(NRL))
+NRL <- read.csv("NRL2018.csv")
+
+#NRL2 <- as.data.frame(table(NRL))
+NRL2 <- NRL[1:3]
+delet <- which(NRL$home.wins==0)
+NRL2 <- NRL2[-delet,]
+NRL2 <- NRL2[1:2]
+NRL2 <- as.data.frame(table(NRL2))
 #Wij("BRO", "CAN", as.data.frame(table(NRL)))
 #Nij("BRO", "CAN", as.data.frame(table(NRL)))
 L <- array(1, 16)
@@ -110,7 +116,8 @@ names(L) <- unique(NRL[,1])
 X <- RBT(NRL2, L, 0.00001)
 print(X)
 results <- rep(1, nrow(NRL))
-NRLModel <- BTm(results, Winner, Loser, data = NRL, refcat="NEW")
+NRLModel <- BTm(cbind(home.wins, away.wins), home.team, away.team, data = NRL, id = "team", refcat = "PAR")
 Z <- BTabilities(NRLModel)
 print(Z)
 sort(Z[,1])-sort(X)
+
