@@ -1,0 +1,75 @@
+---
+title: "BT Extensions Week 1"
+output: html_notebook
+---
+
+23/7/2018:
+
+Repurposing "BayesBT" (Matlab) for R
+ - Note most of the below stuff has already been tested but is the completed functionally code for the new testing which will be Titled "Active Testing : -------"
+
+Test input parameters
+
+```{r}
+library("Matrix")
+
+wh = Matrix(c(0,1,4,2,0,5,1,1,0), ncol = 3, nrow = 3)
+lh = Matrix(c(0,3,1,3,0,0,1,0,0), nrow= 3, ncol = 3)
+theta = 1.5
+iteration = 1
+a = 5
+prec = 1e-8
+a_th = 2
+b_th = 1
+
+```
+
+Parameter Initializaton
+
+```{r}
+
+K = length(wh[,1]) # Number of teams or players
+b = K*a - 1 # 
+lambda = array(1, K) # Skill vector
+iter_max = 5000 # Max iterations
+
+pi_st = Matrix(array(0, iter_max*K), nrow = iter_max, ncol = K) # Values of the normalized skills at each iteration
+theta_st = Matrix(array(0, iter_max), nrow = iter_max, ncol = 1) # Values of home ground advantage at each iteration
+ell = Matrix(array(0, iter_max),nrow = iter_max, ncol = 1) # Log posterior at each iteration
+
+N = wh + lh # number of games between i and j where i is at home
+ak = a - 1 + sum(wh + lh, 2)
+H = sum(sum(wh)) # total number of home field wins
+change = .Machine$double.xmax # Machine maximum
+
+dims = which(N != 0, arr.ind = TRUE) # dimensions of N which are indices
+ind_i = dims[,1] # i values of the sparse matrix
+ind_j = dims[,2] # j values of the sparse matrix
+N_sparse = N[dims] # Sparse N matrix
+
+theta = 1.5 # arbitrary theta
+iteration = 1
+```
+
+Active Testing: Log Posterior calculations
+
+Initialize a sparse matrix containing our initial log-posteriors
+```{r}
+
+Z2 = sparseMatrix(ind_i, ind_j, x = Matrix(N_sparse*log(theta*lambda[ind_i] + lambda[ind_j]))) 
+
+```
+
+Update 'ell' our iterative log-posterior
+
+```{r}
+
+ell[iteration] = (a_th - 1 + H)*log(theta) - b_th * theta + log(lambda) * (a-1 + sum(wh + lh, 2)) - b * sum(lambda) - sum(sum(Z2))
+
+```
+
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+

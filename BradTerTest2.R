@@ -87,6 +87,7 @@ RBT <- function(data, L, tol, k=1){
     L[i] <- liIter(i, data, ansL, k)
   }
   L <- L*(1/min(L))
+  print(L)
   if (length(which((log(L) - log(ansL)) < tol)) == length(L)) {
     return(log(L))
   }
@@ -125,3 +126,13 @@ X <- sort(X)
 plot(X, ylim= range(c(X,Z)), xaxt="n", xlab = "Team", ylab = "Skill Rating")
 axis(1, at=1:16, labels=names(X))
 points(Z, col = 'red')
+
+soccer <- read.csv("soccer.csv", header = TRUE)
+soccer2 <- as.data.frame(table(soccer))
+L <- array(1,30)
+names(L) <- unique(soccer[,1])
+X <- RBT(soccer2, L, 0.0001)
+
+predictor <- function(team1, team2, skill) {
+  return(skill[team1]/(skill[team1] + skill[team2]))
+}
