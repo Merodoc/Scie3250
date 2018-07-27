@@ -45,14 +45,44 @@ BTHome <- function(wh, lh, a, prec = exp(-8), a_th = 1, b_th = 0) {
   iteration = 1
   
   #log-posterior (not necessary)
-  #Z2 = cbind(ind_i, ind_j, log_post)
-  Z2 = sparseMatrix(ind_i, ind_j, x = Matrix(N_sparse*log(theta*lambda[ind_i]+lambda[ind_j])))
-  ell(iteration) = (a_th - 1 + H)*log(theta) - b_th * theta + log(lambda) * (a - 1 + sum(wh + lh, 2))
-  -b * sum(lambda - sum(sum(Z2)))
+  #Z2 = sparseMatrix(ind_i, ind_j, x = Matrix(N_sparse*log(theta*lambda[ind_i] + lambda[ind_j]))) 
+  #ell[iteration] = (a_th - 1 + H)*log(theta) - b_th * theta + t(log(lambda))%*%(a-1 + rowSums(wh + t(lh)) - b * sum(lambda) - sum(Z2))
+  pi_st[iteration, ] = (lambda/sum(lambda))
+  theta_st[iteration] = theta
+  
   # actually calc
-  while(norm(change) > prec && iteration < iter_max) {
-    iteration = iteration + 1
+  while (abs(change)> prec && iteration < iter_max) {
     
-    Z = sparseMatrix()
+    iteration = iteration + 1
+    #  E Step
+    Z = sparseMatrix(ind_i, ind_j, x = Matrix(N_sparse/(theta*lambda[ind_i]+lambda[ind_j])))
+    
+    # Maximize w.r.t lambda
+    
+    sumZ = rowSums(Z)
+    bk = b + theta*sumZ + t(colSums(Z))
+    lambda_new = ak/bk
+    
+    # Maximize w.r.t theta
+    Z = sparseMatrix(ind_i, ind_j, x = Matrix(N_sparse/(theta*lambda_new[ind_i]+lambda_new[ind_j])))
+    sumZ = rowSums(Z)
+    theta = (a_th - 1 + H) / (b_th + sum(lambda_new * sumZ))
+    
+    change = lambda_new/sum(lambda_new) - lambda/sum(lambda)
+    lambda = lambda_new
+    
+    pi_st[iteration, ] = (lambda/sum(lambda))
+    theta_st[iteration] = theta
+    
+    # Log-post
+    #Z2 = sparseMatrix(ind_i, ind_j, x = Matrix(N_sparse*log(theta*lambda[ind_i] + lambda[ind_j]))) 
+    #ell[iteration] = (a_th - 1 + H)*log(theta) - b_th * theta + t(log(lambda))%*%(a-1 + rowSums(wh + t(lh))) - b * sum(lambda) - sum(Z2)
+    
   }
+  
+  pi_st = pi_st[1:iteration, ]
+  theta_st = theta_st[1:iteration]
+  ell = ell[1:iteration]
+  pi = lambda/sum(lambda)
+  
 }
